@@ -1,0 +1,1020 @@
+{
+	"info": {
+		"_postman_id": "termek-ertekelesek-auth-v2",
+		"name": "Termék Értékelések API (Teljes Auth)",
+		"description": "🔒 MINDEN végpont authentikációt igényel kivéve register/login! Bearer token nélkül még a termékek listázása sem elérhető.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "0. Auth (Nyilvános)",
+			"item": [
+				{
+					"name": "0.1 Regisztráció 🌐",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Teszt Felhasználó\",\n    \"email\": \"teszt@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/register",
+							"host": ["{{base_url}}"],
+							"path": ["register"]
+						},
+						"description": "🌐 NYILVÁNOS - Új felhasználó regisztrációja (nem admin)."
+					},
+					"response": []
+				},
+				{
+					"name": "0.2 Login (User) 🌐",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"user_token\", jsonData.token);",
+									"    console.log(\"✅ User token mentve: \" + jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": ["{{base_url}}"],
+							"path": ["login"]
+						},
+						"description": "🌐 NYILVÁNOS - User bejelentkezés. Token automatikusan mentve user_token néven."
+					},
+					"response": []
+				},
+				{
+					"name": "0.3 Login (Admin) 🌐",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"admin_token\", jsonData.token);",
+									"    console.log(\"✅ Admin token mentve: \" + jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": ["{{base_url}}"],
+							"path": ["login"]
+						},
+						"description": "🌐 NYILVÁNOS - Admin bejelentkezés. Token automatikusan mentve admin_token néven."
+					},
+					"response": []
+				},
+				{
+					"name": "0.4 Logout 🔑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/logout",
+							"host": ["{{base_url}}"],
+							"path": ["logout"]
+						},
+						"description": "🔑 AUTH - Kijelentkezés, törli az aktuális tokent."
+					},
+					"response": []
+				},
+				{
+					"name": "0.5 Get Current User 🔑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/user",
+							"host": ["{{base_url}}"],
+							"path": ["user"]
+						},
+						"description": "🔑 AUTH - Bejelentkezett user adatai."
+					},
+					"response": []
+				}
+			],
+			"description": "🌐 Nyilvános végpontok - CSAK regisztráció és login érhető el token nélkül!"
+		},
+		{
+			"name": "1. Products (Auth Required) 🔑",
+			"item": [
+				{
+					"name": "1.1 Get All Products 🔑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": ["{{base_url}}"],
+							"path": ["products"]
+						},
+						"description": "🔑 AUTH REQUIRED - Összes termék lekérése. Token nélkül 401 hiba!"
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Get Single Product 🔑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/1",
+							"host": ["{{base_url}}"],
+							"path": ["products", "1"]
+						},
+						"description": "🔑 AUTH REQUIRED - Egy termék részletei. Token nélkül 401 hiba!"
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Get Product Reviews 🔑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/1/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["products", "1", "reviews"]
+						},
+						"description": "🔑 AUTH REQUIRED - Termékhez tartozó értékelések. Token nélkül 401 hiba!"
+					},
+					"response": []
+				},
+				{
+					"name": "1.4 Create Product 👑 (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gaming Laptop\",\n    \"description\": \"RTX 4090 GPU\",\n    \"price\": 899999\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": ["{{base_url}}"],
+							"path": ["products"]
+						},
+						"description": "👑 ADMIN ONLY - Új termék létrehozása. User tokennel 403 hiba!"
+					},
+					"response": []
+				},
+				{
+					"name": "1.5 Update Product 👑 (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gaming Laptop Pro\",\n    \"price\": 799999\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/products/1",
+							"host": ["{{base_url}}"],
+							"path": ["products", "1"]
+						},
+						"description": "👑 ADMIN ONLY - Termék módosítása. User tokennel 403 hiba!"
+					},
+					"response": []
+				},
+				{
+					"name": "1.6 Delete Product 👑 (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products/1",
+							"host": ["{{base_url}}"],
+							"path": ["products", "1"]
+						},
+						"description": "👑 ADMIN ONLY - Termék törlése. User tokennel 403 hiba!"
+					},
+					"response": []
+				}
+			],
+			"description": "🔑 Termékek - Olvasás is AUTH szükséges! Írás/módosítás/törlés admin jog."
+		},
+		{
+			"name": "2. Reviews (Auth Required) 🔑",
+			"item": [
+				{
+					"name": "2.1 Get All Reviews 🔑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["reviews"]
+						},
+						"description": "🔑 AUTH REQUIRED - Összes értékelés. Token nélkül 401 hiba!"
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Get Single Review 🔑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["reviews", "1"]
+						},
+						"description": "🔑 AUTH REQUIRED - Egy értékelés részletei. Token nélkül 401 hiba!"
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Create Review 🔑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 1,\n    \"product_id\": 1,\n    \"rating\": 5,\n    \"comment\": \"Nagyon jó termék!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["reviews"]
+						},
+						"description": "🔑 AUTH REQUIRED - Új értékelés létrehozása."
+					},
+					"response": []
+				},
+				{
+					"name": "2.4 Update Review 🔑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 4,\n    \"comment\": \"Jó, de drága.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["reviews", "1"]
+						},
+						"description": "🔑 AUTH REQUIRED - Értékelés módosítása."
+					},
+					"response": []
+				},
+				{
+					"name": "2.5 Delete Review 🔑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["reviews", "1"]
+						},
+						"description": "🔑 AUTH REQUIRED - Értékelés törlése."
+					},
+					"response": []
+				}
+			],
+			"description": "🔑 Értékelések - MINDEN művelet AUTH szükséges (olvasás is)!"
+		},
+		{
+			"name": "3. Admin - Users 👑",
+			"item": [
+				{
+					"name": "3.1.1 Get All Users (Paginated) 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users"]
+						},
+						"description": "👑 ADMIN ONLY - Összes user lapozva (20/oldal)."
+					},
+					"response": []
+				},
+				{
+					"name": "3.1.2 Create User 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Admin User\",\n    \"email\": \"newadmin@example.com\",\n    \"password\": \"password123\",\n    \"is_admin\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users"]
+						},
+						"description": "👑 ADMIN ONLY - Új user létrehozása (akár admin is)."
+					},
+					"response": []
+				},
+				{
+					"name": "3.1.3 Get Single User 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/users/2",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users", "2"]
+						},
+						"description": "👑 ADMIN ONLY - Egy user adatai."
+					},
+					"response": []
+				},
+				{
+					"name": "3.1.4 Update User 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Módosított Név\",\n    \"email\": \"modified@example.com\",\n    \"is_admin\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/users/2",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users", "2"]
+						},
+						"description": "👑 ADMIN ONLY - User módosítása (password opcionális)."
+					},
+					"response": []
+				},
+				{
+					"name": "3.1.5 Delete User 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/users/13",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users", "13"]
+						},
+						"description": "👑 ADMIN ONLY - User törlése (cascade: értékelések is)."
+					},
+					"response": []
+				}
+			],
+			"description": "👑 Admin - Felhasználók kezelése"
+		},
+		{
+			"name": "4. Admin - Products 👑",
+			"item": [
+				{
+					"name": "4.1 Get All Products with Reviews 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/products",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "products"]
+						},
+						"description": "👑 ADMIN ONLY - Összes termék értékelésekkel (lapozva)."
+					},
+					"response": []
+				},
+				{
+					"name": "4.2 Create Product (Admin Route) 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Admin Termék\",\n    \"description\": \"Admin route-on keresztül\",\n    \"price\": 12345\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/products",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "products"]
+						},
+						"description": "👑 ADMIN ONLY - Új termék admin végponton."
+					},
+					"response": []
+				},
+				{
+					"name": "4.3 Get Single Product with Reviews 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/products/1",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "products", "1"]
+						},
+						"description": "👑 ADMIN ONLY - Egy termék értékelésekkel."
+					},
+					"response": []
+				},
+				{
+					"name": "4.4 Update Product (Admin Route) 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Módosított Admin Termék\",\n    \"price\": 54321\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/products/1",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "products", "1"]
+						},
+						"description": "👑 ADMIN ONLY - Termék módosítása admin végponton."
+					},
+					"response": []
+				},
+				{
+					"name": "4.5 Delete Product (Admin Route) 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/products/21",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "products", "21"]
+						},
+						"description": "👑 ADMIN ONLY - Termék törlése (cascade: értékelések is)."
+					},
+					"response": []
+				}
+			],
+			"description": "👑 Admin - Termékek kezelése értékelésekkel"
+		},
+		{
+			"name": "5. Admin - Reviews 👑",
+			"item": [
+				{
+					"name": "5.1 Get All Reviews (Paginated) 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "reviews"]
+						},
+						"description": "👑 ADMIN ONLY - Összes értékelés lapozva (20/oldal)."
+					},
+					"response": []
+				},
+				{
+					"name": "5.2 Create Review (Admin) 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user_id\": 2,\n    \"product_id\": 1,\n    \"rating\": 5,\n    \"comment\": \"Admin által létrehozott értékelés\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "reviews"]
+						},
+						"description": "👑 ADMIN ONLY - Értékelés létrehozása admin végponton."
+					},
+					"response": []
+				},
+				{
+					"name": "5.3 Get Single Review 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "reviews", "1"]
+						},
+						"description": "👑 ADMIN ONLY - Egy értékelés részletei."
+					},
+					"response": []
+				},
+				{
+					"name": "5.4 Update Review (Moderate) 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 3,\n    \"comment\": \"Moderált tartalom\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/admin/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "reviews", "1"]
+						},
+						"description": "👑 ADMIN ONLY - Bármely értékelés moderálása."
+					},
+					"response": []
+				},
+				{
+					"name": "5.5 Delete Review 👑",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/reviews/51",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "reviews", "51"]
+						},
+						"description": "👑 ADMIN ONLY - Bármely értékelés törlése."
+					},
+					"response": []
+				}
+			],
+			"description": "👑 Admin - Értékelések moderálása"
+		},
+		{
+			"name": "6. Permission Tests",
+			"item": [
+				{
+					"name": "❌ Products without Token (401)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": ["{{base_url}}"],
+							"path": ["products"]
+						},
+						"description": "❌ Token nélkül - Expected: 401 Unauthenticated"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Reviews without Token (401)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["reviews"]
+						},
+						"description": "❌ Token nélkül - Expected: 401 Unauthenticated"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ User tries Admin endpoint (403)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/admin/users",
+							"host": ["{{base_url}}"],
+							"path": ["admin", "users"]
+						},
+						"description": "❌ User token admin végponton - Expected: 403 Forbidden"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ User tries Create Product (403)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{user_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\",\n    \"price\": 1000\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/products",
+							"host": ["{{base_url}}"],
+							"path": ["products"]
+						},
+						"description": "❌ User próbál terméket létrehozni - Expected: 403 Forbidden"
+					},
+					"response": []
+				}
+			],
+			"description": "🧪 Jogosultság tesztek - ellenőrizzük, hogy a védelem működik"
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost/Termekertekelesek/Termekertekelesek/public/api",
+			"type": "default"
+		},
+		{
+			"key": "user_token",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
