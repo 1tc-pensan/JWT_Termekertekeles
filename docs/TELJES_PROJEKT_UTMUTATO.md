@@ -374,10 +374,10 @@ FONTOS: Egy user NEM írhat több értékelést ugyanarra a termékre!
 
 Példa:
 User #1 (test@example.com)
-  ├── Review #1 (Product #1, Rating: 5) ✅
-  ├── Review #2 (Product #2, Rating: 4) ✅
-  └── Review #3 (Product #3, Rating: 5) ✅
-  ❌ HIBA: Review #4 (Product #1, Rating: 3) - UNIQUE constraint sérül!
+  ├── Review #1 (Product #1, Rating: 5) 
+  ├── Review #2 (Product #2, Rating: 4) 
+  └── Review #3 (Product #3, Rating: 5) 
+   HIBA: Review #4 (Product #1, Rating: 3) - UNIQUE constraint sérül!
 ```
 
 #### **1:N Kapcsolat - products → reviews**
@@ -388,10 +388,10 @@ FONTOS: Egy termék NEM kaphat több értékelést ugyanattól a usertől!
 
 Példa:
 Product #1 (Laptop)
-  ├── Review #1 (User #1, Rating: 5) ✅
-  ├── Review #2 (User #2, Rating: 4) ✅
-  └── Review #3 (User #3, Rating: 5) ✅
-  ❌ HIBA: Review #4 (User #1, Rating: 3) - UNIQUE constraint sérül!
+  ├── Review #1 (User #1, Rating: 5) 
+  ├── Review #2 (User #2, Rating: 4) 
+  └── Review #3 (User #3, Rating: 5) 
+   HIBA: Review #4 (User #1, Rating: 3) - UNIQUE constraint sérül!
 ```
 
 ---
