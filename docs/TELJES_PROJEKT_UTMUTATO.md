@@ -5,15 +5,15 @@
 Laravel 12 alapú REST API termékek értékeléséhez JWT (php-open-source-saver/jwt-auth) authentikációval.
 
 **Funkciók:**
-- ✅ User regisztráció és bejelentkezés
-- ✅ Bearer token alapú authentikáció
-- ✅ Admin és User szerepkörök
-- ✅ Termékek CRUD (Admin)
-- ✅ Értékelések CRUD (User)
-- ✅ Admin felület felhasználók/termékek/értékelések kezeléséhez
-- ✅ Teljes AUTH védelem (MINDEN endpoint token szükséges kivéve register/login)
-- ✅ **Soft Delete** funkció (törölt rekordok helyreállíthatók)
-- ✅ 36 PHPUnit teszt
+-  User regisztráció és bejelentkezés
+-  Bearer token alapú authentikáció
+-  Admin és User szerepkörök
+-  Termékek CRUD (Admin)
+-  Értékelések CRUD (User)
+-  Admin felület felhasználók/termékek/értékelések kezeléséhez
+-  Teljes AUTH védelem (MINDEN endpoint token szükséges kivéve register/login)
+-  **Soft Delete** funkció (törölt rekordok helyreállíthatók)
+-  36 PHPUnit teszt
 
 ---
 
@@ -846,10 +846,10 @@ public function index(Request $request)
 ```
 
 **Előnyök:**
-- ✅ Nincs szükség külön middleware fájlokra
-- ✅ Egyszerűbb architektúra
-- ✅ Átláthatóbb kód
-- ✅ JWT claim alapú ellenőrzés (`is_admin`)
+-  Nincs szükség külön middleware fájlokra
+-  Egyszerűbb architektúra
+-  Átláthatóbb kód
+-  JWT claim alapú ellenőrzés (`is_admin`)
 
 ### 7.2 API Routes Beállítása
 
@@ -1369,7 +1369,7 @@ Content-Type: application/json
 }
 ```
 
-✅ Token automatikusan mentve `admin_token` néven
+ Token automatikusan mentve `admin_token` néven
 
 **2. User bejelentkezés:**
 
@@ -1383,7 +1383,7 @@ Content-Type: application/json
 }
 ```
 
-✅ Token automatikusan mentve `user_token` néven
+ Token automatikusan mentve `user_token` néven
 
 **3. Termékek listázása (AUTH):**
 
