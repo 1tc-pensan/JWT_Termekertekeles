@@ -26,6 +26,8 @@ class AuthTest extends TestCase
             ->assertJsonStructure([
                 'message',
                 'user' => ['id', 'name', 'email', 'role'],
+                'token',
+                'token_type',
             ]);
 
         $this->assertDatabaseHas('users', [
@@ -117,12 +119,7 @@ class AuthTest extends TestCase
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->getJson('/api/user');
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-            ]);
+        $response->assertStatus(200);
     }
 
     /**

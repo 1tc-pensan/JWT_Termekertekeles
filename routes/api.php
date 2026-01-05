@@ -26,7 +26,7 @@ Route::middleware('auth:api')->group(function () {
     // Auth
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        return response()->json($request->user(), 200);
     });
 
     // Products - olvasás (autentikált felhasználók)

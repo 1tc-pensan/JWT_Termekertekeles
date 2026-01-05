@@ -6,7 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -53,6 +53,14 @@ class User extends Authenticatable implements JWTSubject
     public function reviews()
     {
         return $this->hasMany(Reviews::class, 'user_id');
+    }
+
+    /**
+     * Role accessor for backwards compatibility
+     */
+    public function getRoleAttribute(): string
+    {
+        return $this->is_admin ? 'admin' : 'user';
     }
 
     /**

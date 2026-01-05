@@ -31,11 +31,15 @@ class DatabaseSeeder extends Seeder
         // 20 termék létrehozása
         $products = Products::factory(20)->create();
 
-        // 50 értékelés létrehozása (random userek és termékek)
-        Reviews::factory(50)->create([
-            'user_id' => fn() => $users->random()->id,
-            'product_id' => fn() => $products->random()->id,
-        ]);
+        // Értékelések létrehozása - minden user minden termékhez ad értékelést
+        foreach ($users as $user) {
+            foreach ($products->random(5) as $product) {
+                Reviews::factory()->create([
+                    'user_id' => $user->id,
+                    'product_id' => $product->id,
+                ]);
+            }
+        }
 
         // Teszt user
         User::factory()->create([

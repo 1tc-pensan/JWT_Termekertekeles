@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT API Teszter</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        button.admin {
+            background: #f093fb;
+        }
+        button.admin:hover {
+            background: #f5576c;
+        }
+        button.success {
+            background: #4CAF50;
+        }
+        button.success:hover {
+            background: #45a049;
+        }
+        .response {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .response pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #4CAF50;
+            color: white;
+        }
+        .status.error {
+            background: #f44336;
+            color: white;
+        }
+        .token-display {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            word-break: break-all;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 JWT API Teszter</h1>
+        <p class="subtitle">Teszteld az API-t böngészőből - Postman nélkül!</p>
+
+        <div class="token-display" id="tokenDisplay">
+            <strong>Token:</strong> <span id="tokenValue">Még nincs token - jelentkezz be!</span>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🔐 Authentikáció</div>
+            <div class="button-group">
+                <button onclick="adminLogin()">🔑 Admin Login</button>
+                <button onclick="userLogin()">👤 User Login</button>
+                <button onclick="register()">📝 Register (User)</button>
+                <button onclick="getUserProfile()" class="success">👨‍💼 Get Profile</button>
+                <button onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📦 Termékek (Products)</div>
+            <div class="button-group">
+                <button onclick="getProducts()">📋 List Products</button>
+                <button onclick="getProduct(1)">🔍 Get Product #1</button>
+                <button onclick="createProduct()" class="admin">➕ Create Product (Admin)</button>
+                <button onclick="deleteProduct(1)" class="admin">🗑️ Delete Product #1</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">⭐ Értékelések (Reviews)</div>
+            <div class="button-group">
+                <button onclick="getReviews()">📋 List Reviews</button>
+                <button onclick="getReview(1)">🔍 Get Review #1</button>
+                <button onclick="createReview()">➕ Create Review</button>
+                <button onclick="deleteReview(1)">🗑️ Delete Review #1</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">👨‍💼 Admin Műveletek</div>
+            <div class="button-group">
+                <button onclick="getAllUsers()" class="admin">👥 List All Users</button>
+                <button onclick="getAdminProducts()" class="admin">📦 Admin Products</button>
+                <button onclick="getAdminReviews()" class="admin">⭐ Admin Reviews</button>
+            </div>
+        </div>
+
+        <div class="response" id="response">
+            <div style="color: #999;">Válasz ide fog megjelenni...</div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://localhost/lk/JWT_Termekertekeles/public/api';
+        let token = null;
+
+        function updateTokenDisplay() {
+            const display = document.getElementById('tokenValue');
+            if (token) {
+                display.textContent = token.substring(0, 50) + '...';
+                display.style.color = '#28a745';
+            } else {
+                display.textContent = 'Még nincs token - jelentkezz be!';
+                display.style.color = '#dc3545';
+            }
+        }
+
+        async function apiCall(endpoint, method = 'GET', body = null, needsAuth = false) {
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = '<div style="color: #999;">⏳ Kérés folyamatban...</div>';
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+
+            if (needsAuth && token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const options = {
+                method,
+                headers,
+                mode: 'cors'
+            };
+
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}${endpoint}`, options);
+                const data = await response.json();
+
+                let statusClass = response.ok ? 'success' : 'error';
+                let html = `<div class="status ${statusClass}">${response.status} ${response.statusText}</div>`;
+                html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                responseDiv.innerHTML = html;
+
+                // Save token if login
+                if (response.ok && data.token) {
+                    token = data.token;
+                    updateTokenDisplay();
+                    console.log('Token saved:', token);
+                }
+
+                return data;
+            } catch (error) {
+                responseDiv.innerHTML = `<div class="status error">ERROR</div><pre>${error.message}</pre>`;
+                console.error('Error:', error);
+            }
+        }
+
+        // Auth
+        async function adminLogin() {
+            await apiCall('/login', 'POST', {
+                email: 'admin@example.com',
+                password: 'admin123'
+            });
+        }
+
+        async function userLogin() {
+            await apiCall('/login', 'POST', {
+                email: 'testuser@example.com',
+                password: 'password123'
+            });
+        }
+
+        async function register() {
+            const randomEmail = `user${Math.floor(Math.random() * 10000)}@example.com`;
+            await apiCall('/register', 'POST', {
+                name: 'New User',
+                email: randomEmail,
+                password: 'password123',
+                password_confirmation: 'password123'
+            });
+        }
+
+        async function getUserProfile() {
+            await apiCall('/user', 'GET', null, true);
+        }
+
+        async function logout() {
+            await apiCall('/logout', 'POST', null, true);
+            token = null;
+            updateTokenDisplay();
+        }
+
+        // Products
+        async function getProducts() {
+            await apiCall('/products', 'GET', null, true);
+        }
+
+        async function getProduct(id) {
+            await apiCall(`/products/${id}`, 'GET', null, true);
+        }
+
+        async function createProduct() {
+            await apiCall('/products', 'POST', {
+                name: 'Test Product ' + Date.now(),
+                description: 'Created from browser tester',
+                price: 99.99,
+                stock: 50
+            }, true);
+        }
+
+        async function deleteProduct(id) {
+            await apiCall(`/products/${id}`, 'DELETE', null, true);
+        }
+
+        // Reviews
+        async function getReviews() {
+            await apiCall('/reviews', 'GET', null, true);
+        }
+
+        async function getReview(id) {
+            await apiCall(`/reviews/${id}`, 'GET', null, true);
+        }
+
+        async function createReview() {
+            await apiCall('/reviews', 'POST', {
+                product_id: 1,
+                rating: 5,
+                comment: 'Great product! Tested from browser at ' + new Date().toLocaleTimeString()
+            }, true);
+        }
+
+        async function deleteReview(id) {
+            await apiCall(`/reviews/${id}`, 'DELETE', null, true);
+        }
+
+        // Admin
+        async function getAllUsers() {
+            await apiCall('/admin/users', 'GET', null, true);
+        }
+
+        async function getAdminProducts() {
+            await apiCall('/admin/products', 'GET', null, true);
+        }
+
+        async function getAdminReviews() {
+            await apiCall('/admin/reviews', 'GET', null, true);
+        }
+
+        // Initialize
+        updateTokenDisplay();
+    </script>
+</body>
+</html>

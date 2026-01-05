@@ -1,0 +1,738 @@
+{
+	"info": {
+		"_postman_id": "jwt-product-reviews-api-2026-fixed",
+		"name": "JWT Product Reviews API - WORKING",
+		"description": "Teljes API végpontok a Termékértékelés alkalmazáshoz JWT autentikációval\n\nBase URL: http://localhost/lk/JWT_Termekertekeles/public/api\n\nHasználat:\n1. Először futtasd az 'POST Admin Login' vagy 'POST Login' végpontot\n2. A token automatikusan mentésre kerül ('jwt_token' vagy 'admin_token')\n3. A védett végpontok automatikusan használják ezeket a tokeneket\n\nAdmin fiók: admin@example.com / admin123\nUser fiók: testuser@example.com / password123",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"description": "JWT autentikációs végpontok - regisztráció, bejelentkezés, kijelentkezés",
+			"item": [
+				{
+					"name": "POST Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set('jwt_token', jsonData.token);",
+									"        console.log('✅ Token saved: ' + jsonData.token);",
+									"    }",
+									"    ",
+									"    pm.test('User registered successfully', function () {",
+									"        pm.expect(jsonData).to.have.property('user');",
+									"        pm.expect(jsonData).to.have.property('token');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "register"]
+						},
+						"description": "Új felhasználó regisztrációja. A token automatikusan mentésre kerül a 'jwt_token' változóba."
+					},
+					"response": []
+				},
+				{
+					"name": "POST Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set('jwt_token', jsonData.token);",
+									"        console.log('✅ User token saved: ' + jsonData.token);",
+									"    }",
+									"    ",
+									"    pm.test('Login successful', function () {",
+									"        pm.expect(jsonData).to.have.property('token');",
+									"        pm.expect(jsonData.user.is_admin).to.eql(false);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "login"]
+						},
+						"description": "Felhasználói bejelentkezés. Token mentésre kerül 'jwt_token' néven."
+					},
+					"response": []
+				},
+				{
+					"name": "POST Admin Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.token) {",
+									"        pm.collectionVariables.set('admin_token', jsonData.token);",
+									"        console.log('✅ Admin token saved: ' + jsonData.token);",
+									"    }",
+									"    ",
+									"    pm.test('Admin login successful', function () {",
+									"        pm.expect(jsonData.user.is_admin).to.eql(true);",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"admin123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "login"]
+						},
+						"description": "⭐ ELSŐ LÉPÉS! Admin bejelentkezés. Token mentésre kerül 'admin_token' néven. Ez szükséges az admin végpontokhoz."
+					},
+					"response": []
+				},
+				{
+					"name": "POST Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "logout"]
+						},
+						"description": "Kijelentkezés és JWT token invalidálása"
+					},
+					"response": []
+				},
+				{
+					"name": "GET User Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/user",
+							"host": ["{{base_url}}"],
+							"path": ["api", "user"]
+						},
+						"description": "Aktuális bejelentkezett felhasználó adatainak lekérése"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Products",
+			"description": "Termék kezelési végpontok - listázás, részletek, létrehozás, módosítás, törlés",
+			"item": [
+				{
+					"name": "GET All Products",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/products",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products"]
+						},
+						"description": "Összes termék listázása (autentikált végpont)"
+					},
+					"response": []
+				},
+				{
+					"name": "GET Single Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/products/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products", "1"]
+						},
+						"description": "Egy termék részletes adatai ID alapján"
+					},
+					"response": []
+				},
+				{
+					"name": "POST Create Product (Admin)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gaming Keyboard\",\n    \"description\": \"RGB mechanical keyboard\",\n    \"price\": 89.99,\n    \"stock\": 30\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/products",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products"]
+						}
+					}
+				},
+				{
+					"name": "PUT Update Product (Admin)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Pro Gaming Keyboard\",\n    \"description\": \"RGB mechanical keyboard\",\n    \"price\": 99.99,\n    \"stock\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/products/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products", "1"]
+						}
+					}
+				},
+				{
+					"name": "DELETE Product (Admin)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{admin_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/products/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products", "1"]
+						}
+					}
+				},
+				{
+					"name": "GET Product Reviews",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/products/1/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["api", "products", "1", "reviews"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Reviews",
+			"item": [
+				{
+					"name": "GET All Reviews",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews"]
+						}
+					}
+				},
+				{
+					"name": "GET Single Review",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews", "1"]
+						}
+					}
+				},
+				{
+					"name": "POST Create Review",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"product_id\": 1,\n    \"rating\": 5,\n    \"comment\": \"Amazing product!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reviews",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews"]
+						}
+					}
+				},
+				{
+					"name": "PUT Update Review",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"rating\": 4,\n    \"comment\": \"Good product, updated\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews", "1"]
+						}
+					}
+				},
+				{
+					"name": "DELETE Review",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/reviews/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "reviews", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Users",
+					"item": [
+						{
+							"name": "GET All Users",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/users",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "users"]
+								}
+							}
+						},
+						{
+							"name": "GET Single User",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/users/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "users", "1"]
+								}
+							}
+						},
+						{
+							"name": "PUT Update User",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Updated User\",\n    \"email\": \"updated@example.com\",\n    \"is_admin\": false\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/admin/users/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "users", "1"]
+								}
+							}
+						},
+						{
+							"name": "DELETE User",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/users/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "users", "1"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Products",
+					"item": [
+						{
+							"name": "GET All Products (Admin)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/products",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "products"]
+								}
+							}
+						},
+						{
+							"name": "GET Single Product (Admin)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/products/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "products", "1"]
+								}
+							}
+						},
+						{
+							"name": "POST Create Product (Admin)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"4K Monitor\",\n    \"description\": \"Ultra HD monitor\",\n    \"price\": 399.99,\n    \"stock\": 25\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/admin/products",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "products"]
+								}
+							}
+						},
+						{
+							"name": "PUT Update Product (Admin)",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"4K UHD Monitor\",\n    \"description\": \"Ultra HD monitor with HDR\",\n    \"price\": 449.99,\n    \"stock\": 20\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/admin/products/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "products", "1"]
+								}
+							}
+						},
+						{
+							"name": "DELETE Product (Admin)",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/products/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "products", "1"]
+								}
+							}
+						}
+					]
+				},
+				{
+					"name": "Reviews",
+					"item": [
+						{
+							"name": "GET All Reviews (Admin)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/reviews",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "reviews"]
+								}
+							}
+						},
+						{
+							"name": "GET Single Review (Admin)",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/reviews/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "reviews", "1"]
+								}
+							}
+						},
+						{
+							"name": "PUT Update Review (Admin)",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"rating\": 5,\n    \"comment\": \"Updated by admin\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/admin/reviews/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "reviews", "1"]
+								}
+							}
+						},
+						{
+							"name": "DELETE Review (Admin)",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{admin_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/admin/reviews/1",
+									"host": ["{{base_url}}"],
+									"path": ["api", "admin", "reviews", "1"]
+								}
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost/lk/JWT_Termekertekeles/public",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "admin_token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

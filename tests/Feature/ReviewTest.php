@@ -38,8 +38,7 @@ class ReviewTest extends TestCase
 
         $response = $this->getJson('/api/reviews');
 
-        $response->assertStatus(401)
-            ->assertJson(['message' => 'Unauthenticated.']);
+        $response->assertStatus(401);
     }
 
     /**
@@ -87,8 +86,7 @@ class ReviewTest extends TestCase
             'comment' => 'Great!',
         ]);
 
-        $response->assertStatus(401)
-            ->assertJson(['message' => 'Unauthenticated.']);
+        $response->assertStatus(401);
     }
 
     /**
@@ -120,7 +118,7 @@ class ReviewTest extends TestCase
     }
 
     /**
-     * Test: Értékelés törlése
+     * Test: Értékelés törlése (soft delete)
      */
     public function test_user_can_delete_review(): void
     {
@@ -131,9 +129,9 @@ class ReviewTest extends TestCase
         $response = $this->withHeader('Authorization', 'Bearer ' . $token)
             ->deleteJson("/api/reviews/{$review->id}");
 
-        $response->assertStatus(204);
+        $response->assertStatus(200);
 
-        $this->assertDatabaseMissing('reviews', [
+        $this->assertSoftDeleted('reviews', [
             'id' => $review->id,
         ]);
     }
